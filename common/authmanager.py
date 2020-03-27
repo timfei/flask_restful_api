@@ -1,7 +1,7 @@
 from functools import wraps
 from flask_restful import request
 from flask import g
-from common.errorHandle import api_abort
+from common.authErrorHandler import api_abort
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer, BadSignature, SignatureExpired
 import config
 from resources.users.model import User
@@ -57,12 +57,12 @@ def get_token():
 
 
 def invalid_token():
-    response = api_abort(401, error='invalid_token', error_description='token 过期或无效')
-    # response.headers['WWW-Authenticate'] = 'Bearer'
+    response = api_abort(401, message='token 过期或无效')
+    response.headers['WWW-Authenticate'] = 'Bearer'
     return response
 
 
 def token_missing():
-    response = api_abort(401)
-    # response.headers['WWW-Authenticate'] = 'Bearer'
+    response = api_abort(401, message='缺少 token')
+    response.headers['WWW-Authenticate'] = 'Bearer'
     return response

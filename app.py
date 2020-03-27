@@ -2,6 +2,9 @@ from flask import Flask, jsonify
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from werkzeug.exceptions import default_exceptions
+# from common.customErrException import CustomErrException
+
 import config
 
 app = Flask(__name__)
@@ -19,6 +22,30 @@ ma = Marshmallow(app)
 # init restful api
 api = Api(app)
 api.prefix = '/api'
+
+
+# 捕获未知的各类错误
+@app.errorhandler(Exception)
+def handle_error(error):
+    error_info = '{} error'.format(error)
+    response = jsonify({'code': 404, 'message': error_info, 'data': None})
+    response.status_code = 404
+    return response
+
+
+# # 自定义的异常捕获，用于接口需要返回 http status cod 400 等
+# @app.errorhandler(CustomErrException)
+# def handle_custom_error(error):
+#     response = jsonify(error.to_dict())
+#     response.status_code = error.status_code
+#     return response
+
+
+for ex in default_exceptions:
+    app.register_error_handler(ex, handle_error)
+
+# for ex in default_exceptions:
+#     app.register_error_handler(ex, handle_custom_error)
 
 from resources.users.resource import UserRegister
 from resources.users.resource import UserResource
